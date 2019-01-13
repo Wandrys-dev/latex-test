@@ -1,0 +1,363 @@
+\documentclass[a4paper,12pt]{article}
+%\usepackage{a4wide}
+\usepackage[totalwidth=500pt,totalheight=680pt]{geometry}
+\usepackage{graphicx}
+\usepackage{color}
+%\usepackage{dsfont}          %%% alternative to \mathbb: use \mathds instead.
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathrsfs}         %%% this is used only to generate a curly G, via \mathscr{G}
+\usepackage[all]{xy}
+
+\usepackage{amsthm}
+
+\usepackage{url}
+
+% theorem environments
+\newtheorem{lemma}{Lemma} 
+\newtheorem{theorem}{Theorem} 
+\newtheorem*{theorem*}{Theorem} 
+\newtheorem{corollary}{Corollary} 
+\newtheorem{proposition}{Proposition} 
+\newtheorem{conjecture}{Conjecture} 
+\newtheorem{open}{Open Question} 
+\newtheorem{definition}{Definition} 
+
+\theoremstyle{remark}
+\newtheorem{example}{Example} 
+\newtheorem{examples}{Examples} 
+\newtheorem{remark}{Remark} 
+\newtheorem{remarks}{Remarks} 
+
+\newcommand{\comments}[1]{}
+\newcommand{\nosubset}{\makebox[0.1cm][l]{\ensuremath{\subseteq}}/}
+\newcommand{\notmodels}{\ \makebox[0.1cm][l]{\ensuremath{\models}}/ \ }
+\newcommand{\nohom}{
+  \ensuremath{
+      \negthinspace 
+      \longrightarrow
+      \hspace{-5mm} / \hspace{3mm}
+  }
+}
+
+\newcommand{\surhom}{
+  \ensuremath{
+      \negthinspace 
+      \longrightarrow
+      \hspace{-5mm} \rightarrow \hspace{1mm}
+  }
+}
+
+\newcommand{\nosurhom}{
+  \ensuremath{
+      \negthinspace 
+      \longrightarrow
+      \hspace{-5mm} \rightarrow \hspace{-4mm} / \hspace{3mm}
+  }
+}
+
+\newcommand{\NP}[0]{\ensuremath{\mathsf{NP}}}
+\newcommand{\coNP}[0]{\ensuremath{\mathsf{co\mbox{-}NP}}}
+\newcommand{\NL}[0]{\ensuremath{\mathsf{NLogspace}}}
+\newcommand{\Logspace}[0]{\ensuremath{\mathsf{L}}}
+
+\newcommand{\Ptime}[0]{\ensuremath{\mathsf{P}}}
+\newcommand{\Pspace}[0]{\ensuremath{\mathsf{Pspace}}}
+\newcommand{\Pol}[0]{\ensuremath{\mathsf{Pol}}}
+\newcommand{\Hom}[0]{\ensuremath{\textsc{Hom}}}
+\newcommand{\Comp}[0]{\ensuremath{\textsc{Comp}}}
+\newcommand{\Ret}[0]{\ensuremath{\textsc{Ret}}}
+\newcommand{\sHom}[0]{\ensuremath{\textsc{Sur\mbox{-}Hom}}}
+\newcommand{\lHom}[0]{\ensuremath{\textsc{List\mbox{-}Hom}}}
+\newcommand{\ntHom}[0]{\ensuremath{\textsc{Non\mbox{-}Triv\mbox{-}Hom}}}
+\newcommand{\End}[0]{\ensuremath{\mathsf{End}}}
+\newcommand{\Aut}[0]{\ensuremath{\mathsf{Aut}}}
+\newcommand{\sPol}[0]{\ensuremath{\mathsf{sPol}}}
+\newcommand{\Inv}[0]{\ensuremath{\mathsf{Inv}}}
+
+\newcommand{\Nesetril}[0]{Ne\-\v{s}e\-t\v{r}il}\renewcommand{\phi}{\varphi}
+
+\newcommand{\ignore}[1]{}
+\newcommand{\A}{\mathfrak{A}}
+\newcommand{\B}{\mathfrak{B}}
+\newcommand{\C}{\mathfrak{C}}
+\newcommand{\D}{\mathfrak{D}}
+\newcommand{\M}{\mathfrak{M}}
+\newcommand{\bA}{\mathfrak{A}}
+\newcommand{\bB}{\mathfrak{B}}
+\newcommand{\bC}{\mathfrak{C}}
+\newcommand{\bD}{\mathfrak{D}}
+\newcommand{\bE}{\mathfrak{E}}
+\renewcommand{\S}{\mathfrak{S}}
+
+\title{The packing chromatic number of the infinite square lattice is $\leq 16$}
+\author{
+Barnaby Martin\thanks{Supported by EPSRC grant EP/L005654/1.} , Franco Raimondi\thanks{Supported by EPSRC grant EP/K033921/1.} , Taolue Chen \\ 
+Department of Computer Science, Middlesex University, London, U.K. \\
+\texttt{barnabymartin@gmail.com}
+\and
+Jos Martin \\
+The MathWorks, Matrix House, Cambridge, CB4 0HH, U.K.}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Using a SAT-solver on top of a partial previously-known solution we improve the upper bound of the packing chromatic number of the infinite square lattice from $17$ to $16$.
+\end{abstract}
+
+\section{Introduction}
+
+The notion of \emph{packing colouring} comes from the area of frequency planning in wireless networks, and was introduced by Goddard et \mbox{al.} in \cite{BroadcastChromaticNumber} under the name \emph{broadcast colouring}. The \emph{packing chromatic number} of a graph $G$, denoted by $\chi_p(G)$, is the smallest integer $k$ such that $V(G)$ can be partitioned into $k$ disjoint sets $X_1$, \ldots, $X_k$, where for each pair of vertices $x,y \in X_i$ the minimum distance between them in $G$, $\mathit{dist}_G(x, y)$, is greater than $i$, for each $i\in \{1,\ldots,k\}$. In other words,
+vertices with the same colour $i$ are pairwise at distance greater than $i$.
+
+The infinite square lattice $P_\mathbb{Z} \Box P_\mathbb{Z}$ is the graph with vertex set $\mathbb{Z} \times \mathbb{Z}$ and edge set 
+\[ \{((x_1,y_1),(x_2,y_2) : (x_1=x_2 \wedge |y_1-y_2|=1) \vee  (y_1=y_2 \wedge |x_1-x_2|=1)\}.\]
+If $P_\mathbb{Z}$ is the graph with vertices $\mathbb{Z}$ and edges $(x,y)$ given by $|x-y|=1$, then the infinite square lattice is the Cartesian product  $P_\mathbb{Z} \Box P_\mathbb{Z}$, which explains our notation.
+
+The packing chromatic number of the infinite square lattice has been the topic of a number of papers. Goddard et \mbox{al.} showed in \cite{BroadcastChromaticNumber} that $\chi_p(P_\mathbb{Z} \Box P_\mathbb{Z})$ is finite, more precisely between $9$ and $23$ (inclusive). In contrast, the packing chromatic number of the infinite triangular lattice is infinite \cite{FinbowRall07}, though the packing chromatic number of the infinite hexagonal lattice is $7$ \cite{HexagonalLattice7}. The upper bound of \cite{BroadcastChromaticNumber} is witnessed by a finite grid which can be eternally translated in order to periodically cover the plane.
+
+Fiala and Lidick\'y \cite{FialaLidicky07} then improved the lower bound to $10$, and Schwenk \cite{Schwenk02} improved the upper bound to $22$. Later, Ekstein, Fiala, Holub and Lidick\'y used a computer to improve the lower bound to 12 \cite{EksteinFialaHolubLidicky07} and Soukal and Holub used a clever Simulated Annealing algorithm to improve the upper bound to $17$ \cite{SoukalHolub10}. Thus these last bounds, in contrast to those that went before, both made fundamental use of mechanical computation.
+
+The first author heard of this problem at a talk by Bernard Lidick\'y at the 8th Slovenian Conference on Graph Theory (Bled 2011). While this problem may not be important, few who worked on it can doubt that it is very addictive, and further provides a vehicle through which to ponder different algorithmic techniques. One of the curiousities of the problem is that we have little theoretical insight into it. For example, suppose there is a packing colouring with $k$ colours:
+\begin{itemize}
+\item does there exist an $m$ together with an $m \times m$ grid that witnesses a periodic packing colouring with $k$?
+\item does there exist a packing colouring with $k$ that has colour $1$ at maximal density ($1/2$) asymptotically?
+\end{itemize}
+
+In the present note we improve the upper bound from $17$ to $16$. As with all these upper bounds we give a periodic packing colouring based on a finite grid. We make essential use of the periodic $24 \times 24$ $17$-colouring given in \cite{SoukalHolub10}. Essentially, we take their colouring and remove colours $8$ to $17$, then blow this up from $24 \times 24$ to $48 \times 48$. We then give the resulting partially coloured grid to a SAT solver to see if a $16$-colouring is possible, which it turns out it is. Our $16$-colouring is specified as the obvious periodic translation of the colouring in Figure~\ref{fig:main}. Our method with a SAT solver can not run efficiently unless many colours are planted (for example, with just colour $1$ planted on a $24 \times 24$ grid we made no progress). On the other hand, we believe Simulated Annealing might well not find our solution (without a high temperature parameter) and one argument is furnished for this by the tables in Figure~\ref{fig:frequency}. For the Soukal-Holub $17$-colouring, the frequency of each colour monotonely decreases as the colour number rises (something quite unsurprising). Whereas for us, this monotonicity is broken in two places.
+
+\begin{figure}
+\begin{center}
+\resizebox{!}{6.2cm}{
+\ensuremath{
+\mathbb{
+\begin{array}{cccccccccccccccccccccccccccccccccccccccccccccccc}
+ 1 & 7 & 1 & 4 & 1 & 6 & 1 & 3 & 1 & 2 & 1 & 3 & 1 &16 & 1 & 4 & 1 & 5 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 7 & 1 & 4 & 1 & 6 & 1 & 3 & 1 & 2 & 1 & 3 & 1 &13 & 1 & 4 & 1 & 5 & 1 & 3 & 1 & 2 & 1 & 3 \\ 
+ 2 & 1 & 3 & 1 & 2 & 1 & 5 & 1 & 7 & 1 & 4 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 9 & 1 & 6 & 1 &14 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 5 & 1 & 7 & 1 & 4 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &14 & 1 & 6 & 1 & 8 & 1 \\ 
+ 1 & 5 & 1 &13 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 6 & 1 & 5 & 1 & 7 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 4 & 1 & 5 & 1 &10 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 6 & 1 & 5 & 1 & 7 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 4 \\ 
+ 3 & 1 & 2 & 1 &10 & 1 & 4 & 1 & 9 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &10 & 1 & 4 & 1 & 5 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &12 & 1 & 4 & 1 & 8 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &10 & 1 & 4 & 1 & 5 & 1 & 2 & 1 \\ 
+ 1 & 6 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 5 & 1 & 8 & 1 & 4 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 7 & 1 & 8 & 1 & 6 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 5 & 1 &16 & 1 & 4 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 7 & 1 & 9 \\ 
+ 2 & 1 & 4 & 1 & 5 & 1 &11 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &13 & 1 & 5 & 1 &11 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 4 & 1 & 5 & 1 &11 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 9 & 1 & 5 & 1 &11 & 1 & 2 & 1 & 3 & 1\\ 
+ 1 & 3 & 1 & 2 & 1 & 3 & 1 & 6 & 1 & 4 & 1 & 7 & 1 & 3 & 1 & 2 & 1 & 3 & 1 &15 & 1 & 4 & 1 & 5 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 6 & 1 & 4 & 1 & 7 & 1 & 3 & 1 & 2 & 1 & 3 & 1 &12 & 1 & 4 & 1 & 5 \\ 
+15 & 1 & 7 & 1 & 8 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 5 & 1 & 6 & 1 & 4 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 9 & 1 & 7 & 1 &13 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 5 & 1 & 6 & 1 & 4 & 1 & 2 & 1 & 3 & 1 & 2 & 1 \\ 
+ 1 & 2 & 1 & 3 & 1 & 4 & 1 & 5 & 1 &12 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 7 & 1 & 5 & 1 & 6 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 4 & 1 & 5 & 1 &10 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 7 & 1 & 5 & 1 & 6 & 1 & 3 \\ 
+ 4 & 1 & 5 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &10 & 1 & 4 & 1 & 9 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &10 & 1 & 4 & 1 & 5 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &15 & 1 & 4 & 1 & 8 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &10 & 1 \\ 
+ 1 & 3 & 1 & 6 & 1 & 9 & 1 & 7 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 5 & 1 & 8 & 1 & 4 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 6 & 1 &14 & 1 & 7 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 5 & 1 &13 & 1 & 4 & 1 & 3 & 1 & 2 \\ 
+11 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 4 & 1 & 5 & 1 &14 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &12 & 1 & 5 & 1 &11 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 4 & 1 & 5 & 1 &11 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 9 & 1 & 5 & 1 \\ 
+ 1 &16 & 1 & 4 & 1 & 5 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 7 & 1 & 4 & 1 & 6 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 8 & 1 & 4 & 1 & 5 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 7 & 1 & 4 & 1 & 6 & 1 & 3 & 1 & 2 & 1 & 3 \\ 
+ 2 & 1 & 3 & 1 & 2 & 1 &13 & 1 & 6 & 1 & 8 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 5 & 1 & 7 & 1 & 4 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 9 & 1 & 6 & 1 &12 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 5 & 1 & 7 & 1 & 4 & 1 \\ 
+ 1 & 5 & 1 & 7 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 4 & 1 & 5 & 1 &11 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 6 & 1 & 5 & 1 & 7 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 4 & 1 & 5 & 1 &10 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 6 \\ 
+ 3 & 1 & 2 & 1 &10 & 1 & 4 & 1 & 5 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &10 & 1 & 4 & 1 & 9 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &10 & 1 & 4 & 1 & 5 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &14 & 1 & 4 & 1 & 8 & 1 & 2 & 1 \\ 
+ 1 & 4 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 7 & 1 & 9 & 1 & 6 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 5 & 1 &16 & 1 & 4 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 7 & 1 & 8 & 1 & 6 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 5 & 1 &12 \\ 
+ 2 & 1 & 9 & 1 & 5 & 1 &11 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 4 & 1 & 5 & 1 &13 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &15 & 1 & 5 & 1 &11 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 4 & 1 & 5 & 1 &11 & 1 & 2 & 1 & 3 & 1 \\ 
+ 1 & 3 & 1 & 2 & 1 & 3 & 1 &15 & 1 & 4 & 1 & 5 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 6 & 1 & 4 & 1 & 7 & 1 & 3 & 1 & 2 & 1 & 3 & 1 &13 & 1 & 4 & 1 & 5 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 6 & 1 & 4 & 1 & 7 \\ 
+ 5 & 1 & 6 & 1 & 4 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &12 & 1 & 7 & 1 & 8 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 5 & 1 & 6 & 1 & 4 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 9 & 1 & 7 & 1 &15 & 1 & 2 & 1 & 3 & 1 & 2 & 1 \\ 
+ 1 & 2 & 1 & 3 & 1 & 7 & 1 & 5 & 1 & 6 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 4 & 1 & 5 & 1 &11 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 7 & 1 & 5 & 1 & 6 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 4 & 1 & 5 & 1 &10 & 1 & 3 \\ 
+ 4 & 1 &14 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &10 & 1 & 4 & 1 & 5 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &10 & 1 & 4 & 1 & 9 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &10 & 1 & 4 & 1 & 5 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &13 & 1 \\ 
+ 1 & 3 & 1 & 5 & 1 & 8 & 1 & 4 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 6 & 1 & 9 & 1 & 7 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 5 & 1 & 8 & 1 & 4 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 6 & 1 &16 & 1 & 7 & 1 & 3 & 1 & 2 \\ 
+11 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 9 & 1 & 5 & 1 &11 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 4 & 1 & 5 & 1 &12 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &14 & 1 & 5 & 1 &11 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 4 & 1 & 5 & 1 \\ 
+ 1 & 7 & 1 & 4 & 1 & 6 & 1 & 3 & 1 & 2 & 1 & 3 & 1 &16 & 1 & 4 & 1 & 5 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 7 & 1 & 4 & 1 & 6 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 8 & 1 & 4 & 1 & 5 & 1 & 3 & 1 & 2 & 1 & 3 \\ 
+ 2 & 1 & 3 & 1 & 2 & 1 & 5 & 1 & 7 & 1 & 4 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &15 & 1 & 6 & 1 & 8 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 5 & 1 & 7 & 1 & 4 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 9 & 1 & 6 & 1 & 8 & 1 \\ 
+ 1 & 5 & 1 &10 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 6 & 1 & 5 & 1 & 7 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 4 & 1 & 5 & 1 &11 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 6 & 1 & 5 & 1 & 7 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 4 \\ 
+ 3 & 1 & 2 & 1 &12 & 1 & 4 & 1 &13 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &10 & 1 & 4 & 1 & 5 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &10 & 1 & 4 & 1 & 9 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &10 & 1 & 4 & 1 & 5 & 1 & 2 & 1 \\ 
+ 1 & 6 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 5 & 1 &14 & 1 & 4 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 7 & 1 & 9 & 1 & 6 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 5 & 1 &12 & 1 & 4 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 7 & 1 &15 \\ 
+ 2 & 1 & 4 & 1 & 5 & 1 &11 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 9 & 1 & 5 & 1 &11 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 4 & 1 & 5 & 1 &15 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &13 & 1 & 5 & 1 &11 & 1 & 2 & 1 & 3 & 1 \\ 
+ 1 & 3 & 1 & 2 & 1 & 3 & 1 & 6 & 1 & 4 & 1 & 7 & 1 & 3 & 1 & 2 & 1 & 3 & 1 &13 & 1 & 4 & 1 & 5 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 6 & 1 & 4 & 1 & 7 & 1 & 3 & 1 & 2 & 1 & 3 & 1 &14 & 1 & 4 & 1 & 5 \\ 
+ 9 & 1 & 7 & 1 & 8 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 5 & 1 & 6 & 1 & 4 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &14 & 1 & 7 & 1 & 8 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 5 & 1 & 6 & 1 & 4 & 1 & 2 & 1 & 3 & 1 & 2 & 1 \\ 
+ 1 & 2 & 1 & 3 & 1 & 4 & 1 & 5 & 1 &10 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 7 & 1 & 5 & 1 & 6 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 4 & 1 & 5 & 1 &11 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 7 & 1 & 5 & 1 & 6 & 1 & 3 \\ 
+ 4 & 1 & 5 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &15 & 1 & 4 & 1 &12 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &10 & 1 & 4 & 1 & 5 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &10 & 1 & 4 & 1 & 9 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &10 & 1 \\ 
+ 1 & 3 & 1 & 6 & 1 &16 & 1 & 7 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 5 & 1 & 8 & 1 & 4 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 6 & 1 & 9 & 1 & 7 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 5 & 1 & 8 & 1 & 4 & 1 & 3 & 1 & 2 \\ 
+11 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 4 & 1 & 5 & 1 &11 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 9 & 1 & 5 & 1 &11 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 4 & 1 & 5 & 1 &16 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &12 & 1 & 5 & 1 \\ 
+ 1 &13 & 1 & 4 & 1 & 5 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 7 & 1 & 4 & 1 & 6 & 1 & 3 & 1 & 2 & 1 & 3 & 1 &12 & 1 & 4 & 1 & 5 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 7 & 1 & 4 & 1 & 6 & 1 & 3 & 1 & 2 & 1 & 3 \\ 
+ 2 & 1 & 3 & 1 & 2 & 1 & 9 & 1 & 6 & 1 & 8 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 5 & 1 & 7 & 1 & 4 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &13 & 1 & 6 & 1 & 8 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 5 & 1 & 7 & 1 & 4 & 1 \\ 
+ 1 & 5 & 1 & 7 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 4 & 1 & 5 & 1 &10 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 6 & 1 & 5 & 1 & 7 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 4 & 1 & 5 & 1 &11 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 6 \\ 
+ 3 & 1 & 2 & 1 &10 & 1 & 4 & 1 & 5 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &14 & 1 & 4 & 1 &15 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &10 & 1 & 4 & 1 & 5 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &10 & 1 & 4 & 1 & 9 & 1 & 2 & 1 \\ 
+ 1 & 4 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 7 & 1 &13 & 1 & 6 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 5 & 1 &16 & 1 & 4 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 7 & 1 & 9 & 1 & 6 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 5 & 1 & 8 \\ 
+ 2 & 1 &14 & 1 & 5 & 1 &11 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 4 & 1 & 5 & 1 &11 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 9 & 1 & 5 & 1 &11 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 4 & 1 & 5 & 1 &15 & 1 & 2 & 1 & 3 & 1 \\ 
+ 1 & 3 & 1 & 2 & 1 & 3 & 1 &12 & 1 & 4 & 1 & 5 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 6 & 1 & 4 & 1 & 7 & 1 & 3 & 1 & 2 & 1 & 3 & 1 &14 & 1 & 4 & 1 & 5 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 6 & 1 & 4 & 1 & 7 \\ 
+ 5 & 1 & 6 & 1 & 4 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 9 & 1 & 7 & 1 & 8 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 5 & 1 & 6 & 1 & 4 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &12 & 1 & 7 & 1 & 8 & 1 & 2 & 1 & 3 & 1 & 2 & 1 \\ 
+ 1 & 2 & 1 & 3 & 1 & 7 & 1 & 5 & 1 & 6 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 4 & 1 & 5 & 1 &10 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 7 & 1 & 5 & 1 & 6 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 4 & 1 & 5 & 1 &16 & 1 & 3 \\ 
+ 4 & 1 & 9 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &10 & 1 & 4 & 1 & 5 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &13 & 1 & 4 & 1 & 8 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &10 & 1 & 4 & 1 & 5 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &10 & 1 \\ 
+ 1 & 3 & 1 & 5 & 1 & 8 & 1 & 4 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 6 & 1 &12 & 1 & 7 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 5 & 1 &15 & 1 & 4 & 1 & 3 & 1 & 2 & 1 & 3 & 1 & 6 & 1 & 9 & 1 & 7 & 1 & 3 & 1 & 2 \\ 
+11 & 1 & 2 & 1 & 3 & 1 & 2 & 1 &15 & 1 & 5 & 1 &11 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 4 & 1 & 5 & 1 &11 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 9 & 1 & 5 & 1 &11 & 1 & 2 & 1 & 3 & 1 & 2 & 1 & 4 & 1 & 5 & 1 \\
+\end{array}
+}
+}
+}
+\end{center}
+\label{fig:main}
+\caption{Our $48 \times 48$ periodic solution in $16$ colours}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\resizebox{!}{3.9cm}{
+\ensuremath{
+\begin{array}{cc}
+1 & 1152 \\
+2 & 288 \\
+3 & 288 \\
+4 & 128 \\
+5 & 128 \\
+6 & 64 \\
+7 & 64 \\
+8 & 28 \\
+9 & 32 \\
+10 & 32 \\ 
+11 & 31 \\
+12 & 16 \\
+13 & 16 \\
+14 & 13 \\
+15 & 14 \\
+16 & 10 \\
+\\
+\hline
+& 2304
+\end{array}
+}
+}
+\hspace{3cm}
+\resizebox{!}{3.9cm}{
+\ensuremath{
+\begin{array}{cc}
+1 & 288 \\
+2 & 72 \\
+3 & 72 \\
+4 & 32 \\
+5 & 32 \\
+6 & 16 \\
+7 & 16 \\
+8 & 8 \\
+9 & 8 \\
+10 & 8 \\ 
+11 & 8 \\
+12 & 3 \\
+13 & 3 \\
+14 & 3 \\
+15 & 3 \\
+16 & 2 \\
+17 & 2 \\
+\hline
+& 576
+\end{array}
+}
+}
+\end{center}
+\caption{Frequency table for our $16$-colouring on $48\time48$ grid (left) and for the Soukal-Holub $17$-colouring on $24\time24$ (right).}
+\label{fig:frequency}
+\end{figure}
+
+We used the SAT-solver Sat4j and our instance ran for approximately two days on a computer comprising CPU Intel(R) Xeon(R), CPU E5-1620 v2 @ 3.70GHz (4 cores, 8 Hyperthreaded) with 24 GB RAM. Note that Sat4j operates on a single core.
+
+\section{Final Remarks}
+
+We improved the bound for the packing chromatic number of the infinite square lattice by using a SAT-solver on top of partial result garnered by Simulated Annealing. This mixed method approach succeeded where we are unconvinced either approach by itself would have. Several years ago, Bernard Lidick\'y indicated to the first author that most people who worked on this problem believed the true answer to be closer to $12$ than to $17$. Our view does not contradict this but we see no reason why the answer should be $16$. We will endeavour to improve this upper bound but we will not be surprised if we fail.  
+
+\section*{Acknowledgements}
+
+The authors owe a debt of gratitude to \mbox{St.} Michael and \mbox{St.} George.
+
+\bibliographystyle{acm}
+\begin{thebibliography}{1}
+
+\bibitem{EksteinFialaHolubLidicky07}
+{\sc Ekstein, J., Fiala, J., Holub, P., and Lidick\'y, B.}
+\newblock The packing chromatic number of the square lattice is at least 12,
+  2011.
+\newblock Technical Report.
+
+\bibitem{FialaLidicky07}
+{\sc Fiala, J., and Lidick\'y, B.}
+\newblock Packing chromatic number for lattices, 2007.
+\newblock Abstract at Cycles and Colourings 2007 - Tatransk\'a \u{S}trba.
+
+\bibitem{FinbowRall07}
+{\sc Finbow, A.~S., and Rall, D.~F.}
+\newblock On the packing chromatic number of some lattices.
+\newblock {\em Discrete Applied Mathematics 158}, 12 (2010), 1224 -- 1228.
+\newblock Traces from LAGOS’07 \{IV\} Latin American Algorithms, Graphs, and
+  Optimization Symposium Puerto Varas - 2007.
+
+\bibitem{BroadcastChromaticNumber}
+{\sc Goddard, W., Hedetniemi, S.~M., Hedetniemi, S.~T., Harris, J.~M., and
+  Rall, D.~F.}
+\newblock Broadcast chromatic numbers of graphs.
+\newblock In {\em 16th Cumberland Conference on Combinatorics, Graph Theory,
+  and Computing\/} (2003).
+
+\bibitem{HexagonalLattice7}
+{\sc Korže, D., and Vesel, A.}
+\newblock On the packing chromatic number of square and hexagonal lattice.
+\newblock {\em Ars Mathematica Contemporanea 7}, 1 (2012).
+
+\bibitem{Schwenk02}
+{\sc Schwenk, A.}
+\newblock Personal communication, 2002.
+\newblock Communicated to Soukal and Holub.
+
+\bibitem{SoukalHolub10}
+{\sc Soukal, R., and Holub, P.}
+\newblock A note on packing chromatic number of the square lattice.
+\newblock {\em Electr. J. Comb. 17}, 1 (2010).
+
+\end{thebibliography}
+
+
+\end{document}
+
+\resizebox{!}{6.2cm}{
+\ensuremath{
+\mathbb{
+\begin{array}{cccccccccccccccccccccccccccccccccccccccccccccccc}
+ 0 & 6 & 0 & 3 & 0 & 5 & 0 & 2 & 0 & 1 & 0 & 2 & 0 &15 & 0 & 3 & 0 & 4 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 6 & 0 & 3 & 0 & 5 & 0 & 2 & 0 & 1 & 0 & 2 & 0 &12 & 0 & 3 & 0 & 4 & 0 & 2 & 0 & 1 & 0 & 2 \\ 
+ 1 & 0 & 2 & 0 & 1 & 0 & 4 & 0 & 6 & 0 & 3 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 8 & 0 & 5 & 0 &13 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 4 & 0 & 6 & 0 & 3 & 0 & 1 & 0 & 2 & 0 & 1 & 0 &13 & 0 & 5 & 0 & 7 & 0 \\ 
+ 0 & 4 & 0 &12 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 5 & 0 & 4 & 0 & 6 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 3 & 0 & 4 & 0 & 9 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 5 & 0 & 4 & 0 & 6 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 3 \\ 
+ 2 & 0 & 1 & 0 & 9 & 0 & 3 & 0 & 8 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 9 & 0 & 3 & 0 & 4 & 0 & 1 & 0 & 2 & 0 & 1 & 0 &11 & 0 & 3 & 0 & 7 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 9 & 0 & 3 & 0 & 4 & 0 & 1 & 0 \\ 
+ 0 & 5 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 4 & 0 & 7 & 0 & 3 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 6 & 0 & 7 & 0 & 5 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 4 & 0 &15 & 0 & 3 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 6 & 0 & 8 \\ 
+ 1 & 0 & 3 & 0 & 4 & 0 &10 & 0 & 1 & 0 & 2 & 0 & 1 & 0 &12 & 0 & 4 & 0 &10 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 3 & 0 & 4 & 0 &10 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 8 & 0 & 4 & 0 &10 & 0 & 1 & 0 & 2 & 0 \\ 
+ 0 & 2 & 0 & 1 & 0 & 2 & 0 & 5 & 0 & 3 & 0 & 6 & 0 & 2 & 0 & 1 & 0 & 2 & 0 &14 & 0 & 3 & 0 & 4 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 5 & 0 & 3 & 0 & 6 & 0 & 2 & 0 & 1 & 0 & 2 & 0 &11 & 0 & 3 & 0 & 4 \\ 
+14 & 0 & 6 & 0 & 7 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 4 & 0 & 5 & 0 & 3 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 8 & 0 & 6 & 0 &12 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 4 & 0 & 5 & 0 & 3 & 0 & 1 & 0 & 2 & 0 & 1 & 0 \\ 
+ 0 & 1 & 0 & 2 & 0 & 3 & 0 & 4 & 0 &11 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 6 & 0 & 4 & 0 & 5 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 3 & 0 & 4 & 0 & 9 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 6 & 0 & 4 & 0 & 5 & 0 & 2 \\ 
+ 3 & 0 & 4 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 9 & 0 & 3 & 0 & 8 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 9 & 0 & 3 & 0 & 4 & 0 & 1 & 0 & 2 & 0 & 1 & 0 &14 & 0 & 3 & 0 & 7 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 9 & 0 \\ 
+ 0 & 2 & 0 & 5 & 0 & 8 & 0 & 6 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 4 & 0 & 7 & 0 & 3 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 5 & 0 &13 & 0 & 6 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 4 & 0 &12 & 0 & 3 & 0 & 2 & 0 & 1 \\ 
+10 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 3 & 0 & 4 & 0 &13 & 0 & 1 & 0 & 2 & 0 & 1 & 0 &11 & 0 & 4 & 0 &10 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 3 & 0 & 4 & 0 &10 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 8 & 0 & 4 & 0 \\ 
+ 0 &15 & 0 & 3 & 0 & 4 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 6 & 0 & 3 & 0 & 5 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 7 & 0 & 3 & 0 & 4 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 6 & 0 & 3 & 0 & 5 & 0 & 2 & 0 & 1 & 0 & 2 \\ 
+ 1 & 0 & 2 & 0 & 1 & 0 &12 & 0 & 5 & 0 & 7 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 4 & 0 & 6 & 0 & 3 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 8 & 0 & 5 & 0 &11 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 4 & 0 & 6 & 0 & 3 & 0 \\ 
+ 0 & 4 & 0 & 6 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 3 & 0 & 4 & 0 &10 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 5 & 0 & 4 & 0 & 6 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 3 & 0 & 4 & 0 & 9 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 5 \\ 
+ 2 & 0 & 1 & 0 & 9 & 0 & 3 & 0 & 4 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 9 & 0 & 3 & 0 & 8 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 9 & 0 & 3 & 0 & 4 & 0 & 1 & 0 & 2 & 0 & 1 & 0 &13 & 0 & 3 & 0 & 7 & 0 & 1 & 0 \\ 
+ 0 & 3 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 6 & 0 & 8 & 0 & 5 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 4 & 0 &15 & 0 & 3 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 6 & 0 & 7 & 0 & 5 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 4 & 0 &11 \\ 
+ 1 & 0 & 8 & 0 & 4 & 0 &10 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 3 & 0 & 4 & 0 &12 & 0 & 1 & 0 & 2 & 0 & 1 & 0 &14 & 0 & 4 & 0 &10 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 3 & 0 & 4 & 0 &10 & 0 & 1 & 0 & 2 & 0 \\ 
+ 0 & 2 & 0 & 1 & 0 & 2 & 0 &14 & 0 & 3 & 0 & 4 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 5 & 0 & 3 & 0 & 6 & 0 & 2 & 0 & 1 & 0 & 2 & 0 &12 & 0 & 3 & 0 & 4 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 5 & 0 & 3 & 0 & 6 \\ 
+ 4 & 0 & 5 & 0 & 3 & 0 & 1 & 0 & 2 & 0 & 1 & 0 &11 & 0 & 6 & 0 & 7 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 4 & 0 & 5 & 0 & 3 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 8 & 0 & 6 & 0 &14 & 0 & 1 & 0 & 2 & 0 & 1 & 0 \\ 
+ 0 & 1 & 0 & 2 & 0 & 6 & 0 & 4 & 0 & 5 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 3 & 0 & 4 & 0 &10 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 6 & 0 & 4 & 0 & 5 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 3 & 0 & 4 & 0 & 9 & 0 & 2 \\ 
+ 3 & 0 &13 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 9 & 0 & 3 & 0 & 4 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 9 & 0 & 3 & 0 & 8 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 9 & 0 & 3 & 0 & 4 & 0 & 1 & 0 & 2 & 0 & 1 & 0 &12 & 0 \\ 
+ 0 & 2 & 0 & 4 & 0 & 7 & 0 & 3 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 5 & 0 & 8 & 0 & 6 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 4 & 0 & 7 & 0 & 3 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 5 & 0 &15 & 0 & 6 & 0 & 2 & 0 & 1 \\ 
+10 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 8 & 0 & 4 & 0 &10 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 3 & 0 & 4 & 0 &11 & 0 & 1 & 0 & 2 & 0 & 1 & 0 &13 & 0 & 4 & 0 &10 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 3 & 0 & 4 & 0 \\ 
+ 0 & 6 & 0 & 3 & 0 & 5 & 0 & 2 & 0 & 1 & 0 & 2 & 0 &15 & 0 & 3 & 0 & 4 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 6 & 0 & 3 & 0 & 5 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 7 & 0 & 3 & 0 & 4 & 0 & 2 & 0 & 1 & 0 & 2 \\ 
+ 1 & 0 & 2 & 0 & 1 & 0 & 4 & 0 & 6 & 0 & 3 & 0 & 1 & 0 & 2 & 0 & 1 & 0 &14 & 0 & 5 & 0 & 7 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 4 & 0 & 6 & 0 & 3 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 8 & 0 & 5 & 0 & 7 & 0 \\ 
+ 0 & 4 & 0 & 9 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 5 & 0 & 4 & 0 & 6 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 3 & 0 & 4 & 0 &10 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 5 & 0 & 4 & 0 & 6 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 3 \\ 
+ 2 & 0 & 1 & 0 &11 & 0 & 3 & 0 &12 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 9 & 0 & 3 & 0 & 4 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 9 & 0 & 3 & 0 & 8 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 9 & 0 & 3 & 0 & 4 & 0 & 1 & 0 \\ 
+ 0 & 5 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 4 & 0 &13 & 0 & 3 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 6 & 0 & 8 & 0 & 5 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 4 & 0 &11 & 0 & 3 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 6 & 0 &14 \\ 
+ 1 & 0 & 3 & 0 & 4 & 0 &10 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 8 & 0 & 4 & 0 &10 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 3 & 0 & 4 & 0 &14 & 0 & 1 & 0 & 2 & 0 & 1 & 0 &12 & 0 & 4 & 0 &10 & 0 & 1 & 0 & 2 & 0 \\ 
+ 0 & 2 & 0 & 1 & 0 & 2 & 0 & 5 & 0 & 3 & 0 & 6 & 0 & 2 & 0 & 1 & 0 & 2 & 0 &12 & 0 & 3 & 0 & 4 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 5 & 0 & 3 & 0 & 6 & 0 & 2 & 0 & 1 & 0 & 2 & 0 &13 & 0 & 3 & 0 & 4 \\ 
+ 8 & 0 & 6 & 0 & 7 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 4 & 0 & 5 & 0 & 3 & 0 & 1 & 0 & 2 & 0 & 1 & 0 &13 & 0 & 6 & 0 & 7 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 4 & 0 & 5 & 0 & 3 & 0 & 1 & 0 & 2 & 0 & 1 & 0 \\ 
+ 0 & 1 & 0 & 2 & 0 & 3 & 0 & 4 & 0 & 9 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 6 & 0 & 4 & 0 & 5 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 3 & 0 & 4 & 0 &10 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 6 & 0 & 4 & 0 & 5 & 0 & 2 \\ 
+ 3 & 0 & 4 & 0 & 1 & 0 & 2 & 0 & 1 & 0 &14 & 0 & 3 & 0 &11 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 9 & 0 & 3 & 0 & 4 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 9 & 0 & 3 & 0 & 8 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 9 & 0 \\ 
+ 0 & 2 & 0 & 5 & 0 &15 & 0 & 6 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 4 & 0 & 7 & 0 & 3 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 5 & 0 & 8 & 0 & 6 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 4 & 0 & 7 & 0 & 3 & 0 & 2 & 0 & 1 \\ 
+10 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 3 & 0 & 4 & 0 &10 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 8 & 0 & 4 & 0 &10 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 3 & 0 & 4 & 0 &15 & 0 & 1 & 0 & 2 & 0 & 1 & 0 &11 & 0 & 4 & 0 \\ 
+ 0 &12 & 0 & 3 & 0 & 4 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 6 & 0 & 3 & 0 & 5 & 0 & 2 & 0 & 1 & 0 & 2 & 0 &11 & 0 & 3 & 0 & 4 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 6 & 0 & 3 & 0 & 5 & 0 & 2 & 0 & 1 & 0 & 2 \\ 
+ 1 & 0 & 2 & 0 & 1 & 0 & 8 & 0 & 5 & 0 & 7 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 4 & 0 & 6 & 0 & 3 & 0 & 1 & 0 & 2 & 0 & 1 & 0 &12 & 0 & 5 & 0 & 7 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 4 & 0 & 6 & 0 & 3 & 0 \\ 
+ 0 & 4 & 0 & 6 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 3 & 0 & 4 & 0 & 9 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 5 & 0 & 4 & 0 & 6 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 3 & 0 & 4 & 0 &10 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 5 \\ 
+ 2 & 0 & 1 & 0 & 9 & 0 & 3 & 0 & 4 & 0 & 1 & 0 & 2 & 0 & 1 & 0 &13 & 0 & 3 & 0 &14 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 9 & 0 & 3 & 0 & 4 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 9 & 0 & 3 & 0 & 8 & 0 & 1 & 0 \\ 
+ 0 & 3 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 6 & 0 &12 & 0 & 5 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 4 & 0 &15 & 0 & 3 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 6 & 0 & 8 & 0 & 5 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 4 & 0 & 7 \\ 
+ 1 & 0 &13 & 0 & 4 & 0 &10 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 3 & 0 & 4 & 0 &10 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 8 & 0 & 4 & 0 &10 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 3 & 0 & 4 & 0 &14 & 0 & 1 & 0 & 2 & 0 \\ 
+ 0 & 2 & 0 & 1 & 0 & 2 & 0 &11 & 0 & 3 & 0 & 4 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 5 & 0 & 3 & 0 & 6 & 0 & 2 & 0 & 1 & 0 & 2 & 0 &13 & 0 & 3 & 0 & 4 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 5 & 0 & 3 & 0 & 6 \\ 
+ 4 & 0 & 5 & 0 & 3 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 8 & 0 & 6 & 0 & 7 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 4 & 0 & 5 & 0 & 3 & 0 & 1 & 0 & 2 & 0 & 1 & 0 &11 & 0 & 6 & 0 & 7 & 0 & 1 & 0 & 2 & 0 & 1 & 0 \\ 
+ 0 & 1 & 0 & 2 & 0 & 6 & 0 & 4 & 0 & 5 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 3 & 0 & 4 & 0 & 9 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 6 & 0 & 4 & 0 & 5 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 3 & 0 & 4 & 0 &15 & 0 & 2 \\ 
+ 3 & 0 & 8 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 9 & 0 & 3 & 0 & 4 & 0 & 1 & 0 & 2 & 0 & 1 & 0 &12 & 0 & 3 & 0 & 7 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 9 & 0 & 3 & 0 & 4 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 9 & 0 \\ 
+ 0 & 2 & 0 & 4 & 0 & 7 & 0 & 3 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 5 & 0 &11 & 0 & 6 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 4 & 0 &14 & 0 & 3 & 0 & 2 & 0 & 1 & 0 & 2 & 0 & 5 & 0 & 8 & 0 & 6 & 0 & 2 & 0 & 1 \\ 
+10 & 0 & 1 & 0 & 2 & 0 & 1 & 0 &14 & 0 & 4 & 0 &10 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 3 & 0 & 4 & 0 &10 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 8 & 0 & 4 & 0 &10 & 0 & 1 & 0 & 2 & 0 & 1 & 0 & 3 & 0 & 4 & 0 \\ 
+\end{array}
+}
+}
+}
